@@ -1,0 +1,7 @@
+node_modules/
+dist/
+# Rust / Tauri build output
+src-tauri/target/
+src-tauri/gen/
+# Vendored, regenerable assets
+# (kept in repo intentionally; remove next line if you prefer to fetch at build)
