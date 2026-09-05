@@ -8,6 +8,9 @@ Runs on **Windows** (WebView2), **macOS** (WKWebView) and **Linux** (WebKitGTK).
 - Renders **GitHub-Flavored Markdown** (tables, task lists, strikethrough, autolinks, footnotes) via `comrak`.
 - Syntax-highlighted code blocks (highlight.js, vendored — works offline).
 - Auto light/dark theme.
+- **Follows Markdown links in place** - clicking a `.md` link loads that document in the
+  same window; <kbd>Alt</kbd>+<kbd>&larr;</kbd>, <kbd>Backspace</kbd> or the mouse back button
+  returns. Web links open in your browser instead.
 - Registers file associations so the app appears in the OS "Open with" list and can be made the default `.md` handler.
 - Zoom with <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>+</kbd>/<kbd>-</kbd>/<kbd>0</kbd> or <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + wheel.
 - Tiny: a few MB per binary. No npm frontend build step (uses the global Tauri API).
@@ -60,6 +63,26 @@ Bundle output, under `src-tauri/target/release/bundle/`:
 
 `bundle.targets` in `src-tauri/tauri.conf.json` lists every platform's targets; the bundler
 silently ignores the ones that don't apply to the host.
+
+## Following links
+
+Links in the rendered document are classified by target:
+
+| Link | Behaviour |
+| --- | --- |
+| `ADR-001.md`, `../specs/design.md` | Loads in the same window, resolved relative to the current document |
+| `#some-heading` | Scrolls within the document (comrak emits heading anchors) |
+| `https://`, `http://`, `mailto:`, `tel:` | Handed to the OS default browser or mail client |
+| Any other scheme, or a non-Markdown file | Refused, with a short message |
+
+Navigation history is kept per window: <kbd>Alt</kbd>+<kbd>&larr;</kbd>, <kbd>Backspace</kbd>, or the
+mouse's back button steps back through the documents you followed.
+
+Every absolute URL is intercepted before the webview sees it. Letting the webview navigate to a
+remote page would replace the app's own UI with no way back, so that is prevented rather than
+merely discouraged.
+
+Broken links, non-Markdown targets and refused schemes report why instead of failing silently.
 
 ## How the file association works
 
@@ -120,8 +143,9 @@ first launch. See the enhancements list below.
 ```
 ui/                     static frontend (index.html, app.js, style.css, vendored highlight.js + CSS)
 src-tauri/
-  src/main.rs           argv / macOS-Opened capture -> comrak render -> get_opened_file
-                        + open_default_apps_settings
+  src/main.rs           argv / macOS-Opened capture -> comrak render; commands:
+                        get_opened_file, open_markdown (in-window link following),
+                        open_default_apps_settings
   tauri.conf.json       product meta, fileAssociations, per-platform bundle config
   nsis-hooks.nsh        Windows only: adds OpenWithProgids so the app shows in "Open with"
   capabilities/         Tauri v2 permissions (core:default for the main window)

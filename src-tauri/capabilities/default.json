@@ -3,5 +3,9 @@
   "identifier": "default",
   "description": "Default permissions for the main preview window.",
   "windows": ["main"],
-  "permissions": ["core:default"]
+  "permissions": [
+    "core:default",
+    "opener:allow-open-url",
+    "opener:allow-default-urls"
+  ]
 }

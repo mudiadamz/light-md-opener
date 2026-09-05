@@ -47,3 +47,35 @@ main.markdown-body {
     color: #ff7b72;
   }
 }
+
+/* Transient status message: broken links, refused schemes, non-Markdown targets. */
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translate(-50%, 12px);
+  max-width: min(680px, calc(100vw - 48px));
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #1f2328;
+  color: #ffffff;
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 10;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (prefers-color-scheme: dark) {
+  #toast {
+    background: #e6edf3;
+    color: #0d1117;
+  }
+}
