@@ -41,6 +41,9 @@ platform's bundle on that platform (locally or in CI).
 ## Build & run
 
 ```bash
+git clone https://github.com/mudiadamz/light-md-opener.git
+cd light-md-opener
+
 npm install                     # installs @tauri-apps/cli locally
 npm run tauri dev               # run in dev
 npm run tauri dev -- -- path/to/file.md   # dev, opening a file (args after `-- --`)
