@@ -9,8 +9,9 @@ Runs on **Windows** (WebView2), **macOS** (WKWebView) and **Linux** (WebKitGTK).
 - Syntax-highlighted code blocks (highlight.js, vendored — works offline).
 - Auto light/dark theme.
 - **Follows Markdown links in place** - clicking a `.md` link loads that document in the
-  same window; <kbd>Alt</kbd>+<kbd>&larr;</kbd>, <kbd>Backspace</kbd> or the mouse back button
-  returns. Web links open in your browser instead.
+  same window, with browser-style back/forward history. Web links open in your browser instead.
+- **Outline sidebar** listing the document's headings, with the current section highlighted.
+  Toggle it with the toolbar button or <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>B</kbd>; the choice is remembered.
 - Registers file associations so the app appears in the OS "Open with" list and can be made the default `.md` handler.
 - Zoom with <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>+</kbd>/<kbd>-</kbd>/<kbd>0</kbd> or <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + wheel.
 - Tiny: a few MB per binary. No npm frontend build step (uses the global Tauri API).
@@ -75,14 +76,31 @@ Links in the rendered document are classified by target:
 | `https://`, `http://`, `mailto:`, `tel:` | Handed to the OS default browser or mail client |
 | Any other scheme, or a non-Markdown file | Refused, with a short message |
 
-Navigation history is kept per window: <kbd>Alt</kbd>+<kbd>&larr;</kbd>, <kbd>Backspace</kbd>, or the
-mouse's back button steps back through the documents you followed.
+Navigation history works like a browser's: following a new link discards anything that was
+ahead of you.
 
 Every absolute URL is intercepted before the webview sees it. Letting the webview navigate to a
 remote page would replace the app's own UI with no way back, so that is prevented rather than
 merely discouraged.
 
 Broken links, non-Markdown targets and refused schemes report why instead of failing silently.
+
+## Keyboard and mouse
+
+| Action | Shortcut |
+| --- | --- |
+| Back / Forward | <kbd>Alt</kbd>+<kbd>&larr;</kbd> / <kbd>Alt</kbd>+<kbd>&rarr;</kbd> (<kbd>Option</kbd> on macOS) |
+| Back / Forward | <kbd>Backspace</kbd> / <kbd>Shift</kbd>+<kbd>Backspace</kbd> |
+| Back / Forward | Mouse thumb buttons |
+| Toggle the outline | <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>B</kbd> |
+| Zoom in / out / reset | <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>+</kbd> / <kbd>-</kbd> / <kbd>0</kbd> |
+| Zoom | <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + mouse wheel, or trackpad pinch |
+
+The toolbar carries the same three controls - outline toggle, back, forward - plus the name of
+the document on screen. Back and forward grey out when there is nowhere to go.
+
+The outline nests by heading level and highlights the section you are reading as you scroll.
+Clicking an entry jumps to that heading, clear of the toolbar.
 
 ## How the file association works
 
@@ -141,7 +159,9 @@ first launch. See the enhancements list below.
 ## Project structure
 
 ```
-ui/                     static frontend (index.html, app.js, style.css, vendored highlight.js + CSS)
+ui/                     static frontend: index.html (toolbar + outline sidebar + document),
+                        app.js (link following, history, outline, zoom), style.css,
+                        vendored highlight.js + CSS
 src-tauri/
   src/main.rs           argv / macOS-Opened capture -> comrak render; commands:
                         get_opened_file, open_markdown (in-window link following),

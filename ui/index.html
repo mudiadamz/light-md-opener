@@ -9,7 +9,29 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <header id="toolbar">
+      <button id="nav-sidebar" type="button" aria-expanded="true" aria-controls="sidebar">
+        <span aria-hidden="true">&#9776;</span>
+        <span class="sr-only">Toggle outline</span>
+      </button>
+      <button id="nav-back" type="button" disabled>
+        <span aria-hidden="true">&#8592;</span>
+        <span class="sr-only">Back</span>
+      </button>
+      <button id="nav-forward" type="button" disabled>
+        <span aria-hidden="true">&#8594;</span>
+        <span class="sr-only">Forward</span>
+      </button>
+      <span id="doc-name"></span>
+    </header>
+
+    <aside id="sidebar" aria-label="Document outline">
+      <p id="outline-heading">Outline</p>
+      <nav id="outline"></nav>
+    </aside>
+
     <main id="content" class="markdown-body"></main>
+
     <script src="vendor/highlight.min.js"></script>
     <script src="app.js"></script>
   </body>
