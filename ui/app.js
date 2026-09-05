@@ -109,6 +109,7 @@ function updateActiveOutlineEntry() {
 
 let scrollQueued = false;
 window.addEventListener("scroll", () => {
+  scheduleHideControls();
   if (scrollQueued) return;
   scrollQueued = true;
   requestAnimationFrame(() => {
@@ -132,10 +133,45 @@ function sidebarIsOpen() {
   return document.body.classList.contains("with-sidebar");
 }
 
+// --- Floating controls ----------------------------------------------------
+
+// The controls start visible, hide five seconds after the reader scrolls, and
+// come back on any click.
+const CONTROLS_HIDE_MS = 5000;
+let hideTimer = null;
+let hidePending = false;
+
+let pointerOverControls = false;
+
+const controlGroups = () => [el("controls-nav"), el("controls-outline")];
+
+function armHideControls() {
+  clearTimeout(hideTimer);
+  // Never let a pill disappear from under the pointer; the countdown resumes
+  // when it leaves.
+  if (pointerOverControls) return;
+  hideTimer = setTimeout(() => {
+    hidePending = false;
+    document.body.classList.add("controls-hidden");
+  }, CONTROLS_HIDE_MS);
+}
+
+function scheduleHideControls() {
+  hidePending = true;
+  armHideControls();
+}
+
+function showControls() {
+  document.body.classList.remove("controls-hidden");
+  clearTimeout(hideTimer);
+  hidePending = false;
+}
+
 // --- Rendering ------------------------------------------------------------
 
 function render(res, fragment) {
   const content = el("content");
+  showControls();
 
   if (res.error) {
     content.innerHTML = `<p class="notice error">${escapeHtml(res.error)}</p>`;
@@ -148,7 +184,6 @@ function render(res, fragment) {
       `<h1>MD Preview</h1>` +
       `<p>Open a <code>.md</code> file from your file manager to preview it here.</p>` +
       `</div>`;
-    el("doc-name").textContent = "";
     buildOutline();
     return;
   }
@@ -158,7 +193,6 @@ function render(res, fragment) {
   currentPath = res.path;
   // Window title is set natively from Rust; keep document.title in sync too.
   if (res.name) document.title = `${res.name} — MD Preview`;
-  el("doc-name").textContent = res.name || "";
 
   // Colorize fenced code blocks client-side.
   if (window.hljs) {
@@ -266,6 +300,8 @@ async function openExternal(url) {
   }
 }
 
+document.addEventListener("mousedown", showControls, true);
+
 document.addEventListener("click", (e) => {
   // Leave modified clicks and non-primary buttons to the webview.
   if (e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
@@ -300,6 +336,7 @@ window.addEventListener("keydown", (e) => {
 
   if (mod && (e.key === "b" || e.key === "B")) {
     e.preventDefault();
+    showControls();
     setSidebar(!sidebarIsOpen());
     return;
   }
@@ -339,6 +376,17 @@ function wireControls() {
   sidebarBtn.title = `Toggle outline (${MOD_LABEL}+B)`;
   backBtn.title = `Back (${ALT_LABEL}+Left)`;
   forwardBtn.title = `Forward (${ALT_LABEL}+Right)`;
+
+  for (const group of controlGroups()) {
+    group.addEventListener("mouseenter", () => {
+      pointerOverControls = true;
+      clearTimeout(hideTimer);
+    });
+    group.addEventListener("mouseleave", () => {
+      pointerOverControls = false;
+      if (hidePending) armHideControls();
+    });
+  }
 
   sidebarBtn.addEventListener("click", () => setSidebar(!sidebarIsOpen()));
   backBtn.addEventListener("click", goBack);

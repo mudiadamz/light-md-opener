@@ -11,7 +11,9 @@ Runs on **Windows** (WebView2), **macOS** (WKWebView) and **Linux** (WebKitGTK).
 - **Follows Markdown links in place** - clicking a `.md` link loads that document in the
   same window, with browser-style back/forward history. Web links open in your browser instead.
 - **Outline sidebar** listing the document's headings, with the current section highlighted.
-  Toggle it with the toolbar button or <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>B</kbd>; the choice is remembered.
+  Toggle it from the floating button or <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>B</kbd>; the choice is remembered.
+- **Controls stay out of the way** - two floating pills that fade out five seconds after you
+  scroll and return on a click, so nothing sits permanently over the document.
 - Registers file associations so the app appears in the OS "Open with" list and can be made the default `.md` handler.
 - Zoom with <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>+</kbd>/<kbd>-</kbd>/<kbd>0</kbd> or <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + wheel.
 - Tiny: a few MB per binary. No npm frontend build step (uses the global Tauri API).
@@ -96,11 +98,19 @@ Broken links, non-Markdown targets and refused schemes report why instead of fai
 | Zoom in / out / reset | <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>+</kbd> / <kbd>-</kbd> / <kbd>0</kbd> |
 | Zoom | <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + mouse wheel, or trackpad pinch |
 
-The toolbar carries the same three controls - outline toggle, back, forward - plus the name of
-the document on screen. Back and forward grey out when there is nowhere to go.
+The window has no fixed chrome. Two rounded, translucent pills float over the document instead:
+
+- **Top left** - back and forward. They grey out when there is nowhere to go, and sit clear of the
+  outline when it is open.
+- **Top right** - the outline toggle.
+
+Both are visible when a document opens, fade out five seconds after you scroll, and come back on a
+click anywhere. Resting the pointer on a pill keeps it from disappearing mid-reach; the countdown
+resumes when the pointer leaves. The file name lives in the window title bar rather than in the
+chrome.
 
 The outline nests by heading level and highlights the section you are reading as you scroll.
-Clicking an entry jumps to that heading, clear of the toolbar.
+Clicking an entry jumps to that heading.
 
 ## How the file association works
 
@@ -159,8 +169,9 @@ first launch. See the enhancements list below.
 ## Project structure
 
 ```
-ui/                     static frontend: index.html (toolbar + outline sidebar + document),
-                        app.js (link following, history, outline, zoom), style.css,
+ui/                     static frontend: index.html (floating controls + outline sidebar + document),
+                        app.js (link following, history, outline, auto-hiding
+                        controls, zoom), style.css,
                         vendored highlight.js + CSS
 src-tauri/
   src/main.rs           argv / macOS-Opened capture -> comrak render; commands:
