@@ -1,7 +1,7 @@
 {
-  "name": "md-preview-win32",
+  "name": "md-preview",
   "version": "0.1.0",
-  "description": "Lightweight Windows Markdown preview app (Tauri v2)",
+  "description": "Lightweight cross-platform Markdown preview app (Tauri v2)",
   "private": true,
   "scripts": {
     "tauri": "tauri",
