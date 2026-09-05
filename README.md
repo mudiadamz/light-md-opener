@@ -97,6 +97,24 @@ and each bundler translates it for its platform.
   desktop's file-type settings (GNOME Settings → Default Applications, KDE System Settings →
   File Associations).
 
+## Releases
+
+`.github/workflows/release.yml` builds every platform's bundles on a runner of that OS
+(Tauri cannot cross-compile) and attaches them to a GitHub Release.
+
+```bash
+# bump the version in package.json and src-tauri/tauri.conf.json first, then:
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The workflow creates a draft release, uploads the Windows, macOS (Apple Silicon + Intel)
+and Linux bundles into it, and publishes it once all four matrix jobs succeed. It can also
+be started by hand from the Actions tab (`workflow_dispatch`).
+
+The binaries are **not code-signed**: Windows SmartScreen and macOS Gatekeeper will warn on
+first launch. See the enhancements list below.
+
 ## Project structure
 
 ```
@@ -119,5 +137,4 @@ samples/test.md         document exercising the renderer
 - Single-instance + one window per opened file (matters most on macOS, where a running app is
   reused for subsequent "Open with" requests).
 - A native menu bar on macOS (Cmd+W / Cmd+Q, zoom items).
-- CI matrix (windows/macos/ubuntu runners) to produce all bundles per release.
 - Code-sign and notarize the macOS `.app` and code-sign the Windows installer.
